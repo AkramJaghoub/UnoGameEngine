@@ -1,115 +1,104 @@
 package Game;
 
 import Cards.Card;
-import Cards.ColoredCards.ActionCards.Action;
-import Cards.ColoredCards.CardWithColor;
-import Cards.ColoredCards.NumberedCard.CardWithNumber;
-import Cards.DiscardPile;
-import Cards.DrawPile;
-import Cards.WildCards.Wild;
+import Cards.Piles.DiscardPile;
+import Cards.Piles.DrawPile;
+import Command.GameCommand;
 import Player.*;
+import Util.CardFormat;
+import Command.*;
+import Util.Validate;
 
-import java.util.Arrays;
 import java.util.Scanner;
-
 
 public class UnoGame implements Game {
     private final PlayerQueue players;
-    private final Deck deck;
-    private DiscardPile discardPile;
-    private DrawPile drawPile;
+    private final DiscardPile discardPile;
+    private final DrawPile drawPile;
     GameCommand gameCommand;
-    Scanner input = new Scanner(System.in);
 
     public UnoGame() {
-        players = new PlayerQueue();
-        this.deck = Deck.getInstance();
+        players = PlayerQueue.getInstance();
         this.discardPile = DiscardPile.getInstance();
         this.drawPile = DrawPile.getInstance();
+        gameCommand = new GameCommand();
     }
 
     @Override
     public void play() {
-        createPlayers();
-        dealInitialCards();
-        boolean hasEnded = false;
-        System.out.println("\tNUMBER OF PLAYERS IN THE GAME: " + players.getNumberOfPlayers());
-        gameCommand = new GameCommand(drawPile, discardPile, players);
-        for (Player player : players) {
-            player.displayPlayerCards();
-        }
-        System.out.println();
-        while (!hasEnded) {
-            gameCommand.getPlayerTurn();
-            System.out.println();
-            if (gameCommand.isPlayable()) {
+        preGameSetUp();
+        boolean playGame = true;
+        while (playGame) {
+            boolean hasEnded = false;
+            while (!hasEnded) {
+                gameCommand.getPlayerTurn();
+                System.out.println();
                 players.getCurrentPlayer().displayPlayerCards();
-                System.out.println("**********************************************");
-                System.out.println("Current Top Card: \n" + CardFormat.formatCard(discardPile.getTop()));
-                System.out.println("**********************************************");
-                System.out.print("NOW CHOOSE A CARD THAT MATCHES THE TOP OF THE DISCARD:");
-                int selectedCardIndex = input.nextInt() - 1;
-                if (gameCommand.isPlayableCard(selectedCardIndex)) {
-                    Card card = gameCommand.playCard(selectedCardIndex);
-                    System.out.println("**********************************************");
-                    discardPile.addCardToDiscardPile(card);
+                if (gameCommand.isPlayable()) {
+                    System.out.println("Current Top Card: \n" + CardFormat.formatCard(discardPile.getTop()));
+                    System.out.print("NOW CHOOSE A CARD THAT MATCHES THE TOP OF THE DISCARD:");
+                    int selectedCardIndex = Validate.handleCardsInput();
+                    if (gameCommand.isPlayableCard(selectedCardIndex)) {
+                        Card card = gameCommand.playCard(selectedCardIndex);
+                        System.out.println("**********************************************");
+                        discardPile.addCardToDiscardPile(card);
+                    } else {
+                        System.out.println("\n**********************************************");
+                        System.out.println("HEY " + players.getCurrentPlayer().getName() + ", CHOOSE A CARD THAT MATCHES THE TOP.");
+                        System.out.println("**********************************************");
+                        continue;
+                    }
                 } else {
-                    System.out.println("\n**********************************************");
-                    System.out.println("HEY " + players.getCurrentPlayer().getName() + ", CHOOSE A CARD THAT MATCHES THE TOP.");
-                    System.out.println("**********************************************");
-                    continue;
+                    System.out.println("You don't have a playable card, drawing one card...");
+                    Card card = drawPile.drawCard();
+                    if (card.canPlayOn(discardPile.getTop())) {
+                        System.out.println("HEY, YOU HAVE DRAWN A MATCHED CARD!\n" + CardFormat.formatCard(card));
+                        System.out.println("\n");
+                        if (drawPile.isSpecialCard(card)) {
+                            new CardCommand(card, gameCommand).execute(); //check if the drawn card is an action card to perform an action
+                        } else {
+                            players.getNextPlayer();
+                        }
+                        discardPile.addCardToDiscardPile(card);
+                    } else {
+                        System.out.println("Sorry, the drawn card\n" + CardFormat.formatCard(card) + " \ndoesn't match, adding it to your collection.");
+                        players.getCurrentPlayer().addCardToPlayerHand(card);
+                        players.getNextPlayer(); //proceed to the next player if they didn't draw a matched card
+                    }
                 }
-            } else {
-                System.out.println("**********************************************");
-                System.out.println("You don't have a playable card, drawing one card...");
-                Card card = drawPile.getCard();
-                if (card.isValid(discardPile.getTop())) {
-                    System.out.println("**********************************************");
-                    System.out.println("HEY, YOU HAVE DRAWN A MATCHED CARD! " + CardFormat.formatCard(drawPile.getTop()));
-                    System.out.println("**********************************************");
-                    discardPile.addCardToDiscardPile(card);
-                } else {
-                    System.out.println("**********************************************");
-                    System.out.println("Sorry, the drawn card" + CardFormat.formatCard(drawPile.getTop()) + " doesn't match, adding it to your collection.");
-                    System.out.println("**********************************************");
-                    players.getCurrentPlayer().addCardToPlayerHand(card);
-                }
-                players.getNextPlayer(); //proceed to the next player whether they had drawn a matched card or not
+                hasEnded = players.checkForWinner();
             }
-            gameCommand.updateGameStatus(drawPile, discardPile, players);
-            hasEnded = checkForWinner();
+            playGame = playAgain(); //yes plays another round no ends the game
+            if(playGame)
+                resetGame();
         }
     }
-
-    public void createPlayers() {
-        System.out.println("ENTER PLAYERS NAMES");
-        String playerNamesInput = input.nextLine().toUpperCase();
-        String[] playersNames = playerNamesInput.split(" ");
-        System.out.println();
-        for (String playerName : playersNames) {
-            Player newPlayer = new Player(playerName);
-            players.addPlayer(newPlayer);
-        }
+    private void preGameSetUp(){
+        String [] playerNames = Validate.handlePlayerNamesInput();
+        players.createPlayers(playerNames);
+        dealInitialCards();
     }
 
-    public void dealInitialCards() {
-        this.drawPile = DrawPile.getInstance();
+    private void dealInitialCards() {
         for (int i = 0; i < 7; ++i) {
             for (Player player : players) {
-                Card card = drawPile.getCard();
+                Card card = drawPile.drawCard();
                 player.addCardToPlayerHand(card);
             }
         }
-        this.discardPile = DiscardPile.getInstance();
     }
 
-    public boolean checkForWinner() {
-        for (Player player : players) {
-            if (player.getCardsInHand().size() == 0) {
-                System.out.println(player.getName() + " HAS WON CONGRATULATIONS!!");
-                return true;
-            }
-        }
-        return false;
+    private boolean playAgain() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Do you want to play again? (yes/no): ");
+        String input = scanner.nextLine().trim().toLowerCase();
+        return input.equals("yes");
+    }
+
+    private void resetGame(){
+        players.resetPlayerCards();
+        DrawPile.getInstance().initializeDrawPile();
+        DiscardPile.getInstance().initializeDiscardPile();
+        dealInitialCards();
     }
 }

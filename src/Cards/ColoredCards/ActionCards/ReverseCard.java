@@ -2,7 +2,7 @@ package Cards.ColoredCards.ActionCards;
 
 import Cards.ColoredCards.Color;
 import Player.PlayerQueue;
-import Game.GameCommand;
+import Command.GameCommand;
 
 public class ReverseCard extends Action {
 

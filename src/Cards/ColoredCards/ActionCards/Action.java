@@ -5,7 +5,8 @@ import Cards.ColoredCards.CardWithColor;
 import Cards.ColoredCards.Color;
 import Cards.ColoredCards.NumberedCard.CardWithNumber;
 import Cards.WildCards.Wild;
-import Game.GameCommand;
+import Command.GameCommand;
+import Validation.Exception.CardNotFoundException;
 
 public abstract class Action extends CardWithColor {
     private final ActionType actionType;
@@ -14,27 +15,29 @@ public abstract class Action extends CardWithColor {
         this.actionType = actionType;
     }
 
-    public ActionType getActionCard(){
+    public ActionType getActionType(){
         return actionType;
     }
 
     public abstract void performAction(GameCommand gameCommand);
 
     @Override
-    public Boolean isValid(Card otherCard) {
-        if(otherCard instanceof CardWithNumber){
-            CardWithNumber card2 = (CardWithNumber) otherCard;
-            return (getColor() == card2.getColor());
+    public boolean canPlayOn(Card topDiscardCard) {
+        if(topDiscardCard instanceof CardWithNumber top){
+            return getColor() == top.getColor();
         }
-        if(otherCard instanceof Action){
-            Action card2 = (Action) otherCard;
-            return (getColor() == card2.getColor() || getCardName().equals(card2.getCardName()));
+        if(topDiscardCard instanceof Action top){
+            return getColor() == top.getColor() || getCardName().equals(top.getCardName());
         }
-        if(otherCard instanceof Wild){
-            Wild card2 = (Wild) otherCard;
-            return getColor() == card2.getChosenColor();
+        if(topDiscardCard instanceof Wild top){
+            return getColor() == top.getChosenColor();
         }
-        return false;
+        throw new CardNotFoundException();
+    }
+
+    @Override
+    public int cardScore(){
+        return 20;
     }
 
     @Override

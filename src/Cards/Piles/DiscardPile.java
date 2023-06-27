@@ -1,4 +1,6 @@
-package Cards;
+package Cards.Piles;
+
+import Cards.Card;
 
 import java.util.Stack;
 
@@ -18,12 +20,13 @@ public class DiscardPile {
     }
 
     public void initializeDiscardPile(){
+        discardPileCards.clear();
         DrawPile drawPile = DrawPile.getInstance();
         while (drawPile.isSpecialCard(drawPile.getTop())) {
-            Card removedFromDraw = drawPile.getCard();
+            Card removedFromDraw = drawPile.drawCard();
             addCardToDiscardPile(removedFromDraw);
         }
-        addCardToDiscardPile(drawPile.getCard());
+        addCardToDiscardPile(drawPile.drawCard());
     }
 
     public void addCardToDiscardPile(Card card) {

@@ -1,16 +1,14 @@
 package Player;
 
 import Cards.Card;
-import Game.CardFormat;
-import Game.UnoGame;
-
+import Util.CardFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Player {
     private final String name;
-    private final List<Card>  cardsInHand;
-    private int position;
+    private final List<Card> cardsInHand;
+    private int roundPoints;
 
     public Player(String name) {
         this.name = name;
@@ -23,6 +21,14 @@ public class Player {
 
     public List<Card> getCardsInHand() {
         return cardsInHand;
+    }
+
+    public void clearCardsInHand(){
+        cardsInHand.clear();
+    }
+
+    public int getRoundPoints(){
+        return roundPoints;
     }
 
 
@@ -50,15 +56,16 @@ public class Player {
         }
         System.out.println();
     }
-    public Card getChosenCard(int pos){
+
+    public Card getChosenCard(int pos) {
         return cardsInHand.get(pos);
     }
 
-    public Card playCard(int cardPos){
+    public Card playCard(int cardPos) {
         return cardsInHand.remove(cardPos);
     }
 
-    public void sayUno(Player player) {
-        System.out.println(player.getName() + " Said UNO!!");
+    public void addToScore(int roundPoints){
+        this.roundPoints += roundPoints;
     }
 }

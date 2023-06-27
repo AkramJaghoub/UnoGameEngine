@@ -1,8 +1,11 @@
-package Cards;
+package Cards.Piles;
 
+import Cards.Card;
 import Cards.ColoredCards.ActionCards.Action;
 import Cards.WildCards.Wild;
 import Game.Deck;
+import Validation.Exception.InvalidDrawException;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Stack;
@@ -22,7 +25,8 @@ public class DrawPile {
         return instance;
     }
 
-    private void initializeDrawPile() {
+    public void initializeDrawPile() {
+        drawPileCards.clear();
         List<Card> cards = Deck.getInstance().getDeckCards();
         Collections.shuffle(cards);
         addCardsToDrawPile(cards);
@@ -36,7 +40,9 @@ public class DrawPile {
         return drawPileCards.peek();
     }
 
-    public Card getCard() {
+    public Card drawCard() {
+        if(isEmpty())
+            makeNewDrawPile();
         return drawPileCards.pop();
     }
 
@@ -52,13 +58,18 @@ public class DrawPile {
         return drawPileCards.size();
     }
 
-    public void makeNewDrawPile(Stack<Card> discardedCards) {
-        Card peekCard = discardedCards.pop();
-        Collections.shuffle(discardedCards);
+    public void makeNewDrawPile() {
         drawPileCards.clear();
-        addCardsToDrawPile(discardedCards);
-        discardedCards.clear();
-        discardedCards.push(peekCard);
+        Stack<Card> discardedPileCards = DiscardPile.getInstance().getDiscardPileCards();
+        Card peekCard = discardedPileCards.pop();
+        while(!discardedPileCards.isEmpty()){
+            drawPileCards.push(discardedPileCards.pop());
+        }
+        Collections.shuffle(drawPileCards);
+        discardedPileCards.clear();
+        discardedPileCards.push(peekCard);
+        if(discardedPileCards.isEmpty())
+            throw new InvalidDrawException();  //because it can't create a new draw pile
     }
 
     public boolean isSpecialCard(Card card) {

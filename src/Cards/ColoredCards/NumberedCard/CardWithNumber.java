@@ -5,16 +5,17 @@ import Cards.ColoredCards.ActionCards.Action;
 import Cards.ColoredCards.CardWithColor;
 import Cards.ColoredCards.Color;
 import Cards.WildCards.Wild;
+import Validation.Exception.CardNotFoundException;
 
 import java.util.Objects;
 
 public class CardWithNumber extends CardWithColor {
-    private final Number number;
-    public CardWithNumber(Number number, Color color){
+    private final int number;
+    public CardWithNumber(int number, Color color){
         super(color);
         this.number = number;
     }
-    public Number getNumber(){
+    public int getNumber(){
         return number;
     }
 
@@ -24,17 +25,22 @@ public class CardWithNumber extends CardWithColor {
     }
 
     @Override
-    public Boolean isValid(Card otherCard) {
-        if(otherCard instanceof Action){
-            Action card2 = (Action) otherCard;
-            return getColor() == card2.getColor();
+    public boolean canPlayOn(Card topDiscardCard) {
+        if(topDiscardCard instanceof CardWithNumber top){
+            return (Objects.equals(getNumber(), top.getNumber()) || getColor() == top.getColor());
         }
-        if(otherCard instanceof Wild){
-            Wild card2 = (Wild) otherCard;
-            return getColor() == card2.getChosenColor();
+        if(topDiscardCard instanceof Action top){
+            return getColor() == top.getColor();
         }
-        CardWithNumber card2 = (CardWithNumber) otherCard;
-        return (Objects.equals(getNumber(), card2.getNumber()) || getColor() == card2.getColor());
+        if(topDiscardCard instanceof Wild top){
+            return getColor() == top.getChosenColor();
+        }
+        throw new CardNotFoundException();
+    }
+
+    @Override
+    public int cardScore() {
+        return this.number;
     }
 
     @Override

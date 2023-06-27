@@ -10,10 +10,11 @@ import java.util.List;
 public class Deck {
     private static Deck instance;
     private final List<Card> deckCards;
-    private final CardFactory cardFactory = new CardFactory();
+    private final CardFactory cardFactory;
 
     private Deck(){
         deckCards = new ArrayList<>();
+        cardFactory = new CardFactory();
         createCards();
     }
 

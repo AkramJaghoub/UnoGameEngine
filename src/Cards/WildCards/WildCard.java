@@ -1,7 +1,6 @@
 package Cards.WildCards;
 
-import Game.Game;
-import Game.GameCommand;
+import Command.GameCommand;
 
 public class WildCard extends Wild {
 

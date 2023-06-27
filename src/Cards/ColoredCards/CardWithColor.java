@@ -1,7 +1,7 @@
 package Cards.ColoredCards;
 
 import Cards.Card;
-public abstract class CardWithColor extends Card {
+public abstract class CardWithColor implements Card {
     private final Color color;
 
     protected CardWithColor(Color color) {

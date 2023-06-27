@@ -2,10 +2,10 @@ package Cards.WildCards;
 
 import Cards.Card;
 import Cards.ColoredCards.Color;
-import Game.GameCommand;
-import java.util.Scanner;
+import Command.GameCommand;
+import Util.Validate;
 
-public abstract class Wild extends Card {
+public abstract class Wild implements Card{
     private final WildType wildType;
     private Color chosenColor;
 
@@ -21,25 +21,27 @@ public abstract class Wild extends Card {
         return chosenColor;
     }
 
+    public abstract void performAction(GameCommand gameCommand);
+
     public void determineChosenColor(){
-        System.out.println("Choose one of the colors below for the Wild Card");
-        System.out.println("1. Red\t  2. Blue\t  3. Green\t  4. Yellow");
-        Scanner input = new Scanner(System.in);
-        int colorChoice = input.nextInt();
+        int colorChoice = Validate.handleWildColorsInput();
         this.chosenColor = switch (colorChoice) {
             case 1 -> Color.RED;
             case 2 -> Color.BLUE;
             case 3 -> Color.GREEN;
             case 4 -> Color.YELLOW;
-            default -> throw new IllegalArgumentException("COLOR DOESN'T EXIST");
+            default -> throw new IllegalStateException("Unexpected value: " + colorChoice);
         };
     }
 
-    public abstract void performAction(GameCommand gameCommand);
+    @Override
+    public boolean canPlayOn(Card topDiscardCard) {
+        return true;
+    }
 
     @Override
-    public Boolean isValid(Card otherCard) {
-        return true;
+    public int cardScore() {
+        return 50;
     }
 
     @Override

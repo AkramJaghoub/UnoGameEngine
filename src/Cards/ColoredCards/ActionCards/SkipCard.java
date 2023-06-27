@@ -2,7 +2,7 @@ package Cards.ColoredCards.ActionCards;
 
 import Cards.ColoredCards.Color;
 import Player.PlayerQueue;
-import Game.GameCommand;
+import Command.GameCommand;
 
 public class SkipCard extends Action{
     public SkipCard(ActionType actionType, Color color) {
@@ -14,7 +14,6 @@ public class SkipCard extends Action{
           players.getNextPlayer();
           players.getNextPlayer();
     }
-
     @Override
     public String getCardName() {
         return "Skip";
