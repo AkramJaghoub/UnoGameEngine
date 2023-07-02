@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Player {
-    private final String name;
+    private String name;
     private final List<Card> cardsInHand;
     private int roundPoints;
 
@@ -17,6 +17,10 @@ public class Player {
 
     public String getName() {
         return name;
+    }
+
+    public void setName(String player){
+        name = player;
     }
 
     public List<Card> getCardsInHand() {
@@ -31,28 +35,38 @@ public class Player {
         return roundPoints;
     }
 
-
     public void addCardToPlayerHand(Card card) {
         cardsInHand.add(card);
+    }
+
+    public void getPlayerTurn() {
+        System.out.println("It's " + getName() + "'s turn");
+        displayPlayerCards();
     }
 
     public void displayPlayerCards() {
         System.out.println(getName() + " Cards:");
         StringBuilder[] cardLines = new StringBuilder[6];
+        int cardCount = 0; //counter to tracking the number of cards per line
         for (int i = 0; i < cardsInHand.size(); ++i) {
             Card card = cardsInHand.get(i);
             String cardString = CardFormat.formatCard(card, i);
             String[] lines = cardString.split("\n");
             for (int j = 0; j < lines.length; j++) {
-                if (cardLines[j] == null) {
-                    cardLines[j] = new StringBuilder();
-                }
-                cardLines[j].append(lines[j]);
-                cardLines[j].append("  "); // Add two spaces between each card
+                cardLines[j] = cardLines[j] == null ? new StringBuilder() : cardLines[j];
+                cardLines[j].append(lines[j]).append("  ");
             }
-        }
-        for (StringBuilder line : cardLines) {
-            System.out.println(line);
+            cardCount++;
+            if (cardCount == 7 || i == cardsInHand.size() - 1) {
+                for (StringBuilder line : cardLines) {
+                    if (line != null) {
+                        System.out.println(line);
+                    }
+                }
+                System.out.println();
+                cardLines = new StringBuilder[6];
+                cardCount = 0;
+            }
         }
         System.out.println();
     }

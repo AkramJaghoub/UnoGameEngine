@@ -5,7 +5,6 @@ import Cards.ColoredCards.ActionCards.Action;
 import Cards.WildCards.Wild;
 import Game.Deck;
 import Validation.Exception.InvalidDrawException;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Stack;

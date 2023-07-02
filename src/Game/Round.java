@@ -27,4 +27,13 @@ public class Round {
         }
         return handScore;
     }
+
+    public void displayScoreboard(){
+        System.out.println("----------------------------------");
+        System.out.println("PLAYERS SCOREBOARD");
+        for(Player player : players){
+            System.out.println(player.getName() + ": " + player.getRoundPoints());
+        }
+        System.out.println("----------------------------------");
+    }
 }

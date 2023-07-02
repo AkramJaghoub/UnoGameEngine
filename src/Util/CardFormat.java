@@ -24,7 +24,7 @@ public final class CardFormat {
         }
 
         if (card instanceof Wild wildCard) {
-            colorCode = wildCard.getChosenColor() != null ? checkColor(wildCard.getChosenColor()) : "\u001B[37m";
+            colorCode = wildCard.getChosenColor() != null ? checkColor(wildCard.getChosenColor()) : "\u001B[37m"; //if color wasn't chosen color it to white
             cardValue = " " + wildCard.getCardName() + " ";
         } else {
             CardWithColor coloredCard = (CardWithColor) card;

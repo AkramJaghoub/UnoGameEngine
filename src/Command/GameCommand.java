@@ -3,6 +3,7 @@ package Command;
 import Cards.*;
 import Cards.Piles.DiscardPile;
 import Cards.Piles.DrawPile;
+import Player.Player;
 import Player.PlayerQueue;
 import Util.CardFormat;
 
@@ -29,11 +30,7 @@ public class GameCommand {
         return players;
     }
 
-    public void getPlayerTurn() {
-        System.out.println("It's " + players.getCurrentPlayer().getName() + "'s turn");
-    }
-
-    public boolean isPlayable() {
+    public boolean isCardAvailable() {
         for (Card card : players.getCurrentPlayer().getCardsInHand()) {
             if (card.canPlayOn(discardPile.getTop())) {
                 return true;
@@ -46,12 +43,22 @@ public class GameCommand {
         return players.getCurrentPlayer().getChosenCard(pos).canPlayOn(discardPile.getTop());
     }
 
-    public Card playCard(int pos) {
+    public void playCard(Card chosenCard) {
         Command playCommand;
-        Card card = players.getCurrentPlayer().playCard(pos);
-        System.out.println(players.getCurrentPlayer().getName() + " played: \n" + CardFormat.formatCard(card));
+        Player currentPlayer = players.getCurrentPlayer();
+        Card card = currentPlayer.playCard(currentPlayer.getCardsInHand().indexOf(chosenCard));
+        System.out.println(currentPlayer.getName() + " played: \n" + CardFormat.formatCard(card));
+        discardPile.addCardToDiscardPile(card);
         playCommand = new CardCommand(card, this);
         playCommand.execute();
-        return card;
+    }
+
+    public void playMatchedCard(Card matchedCard){
+        Command playCommand;
+        Player currentPlayer = players.getCurrentPlayer();
+        System.out.println(currentPlayer.getName() + " played: \n" + CardFormat.formatCard(matchedCard));
+        discardPile.addCardToDiscardPile(matchedCard);
+        playCommand = new CardCommand(matchedCard, this);
+        playCommand.execute();
     }
 }

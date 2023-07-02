@@ -4,7 +4,6 @@ import Player.PlayerQueue;
 import Validation.Exception.IllegalNumberOfPlayersException;
 import Validation.Exception.InvalidCardIndexException;
 import Validation.Exception.InvalidColorIndexException;
-
 import java.util.InputMismatchException;
 import java.util.Scanner;
 

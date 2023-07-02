@@ -1,7 +1,6 @@
 package Player;
 
 import Game.Round;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -9,11 +8,13 @@ import java.util.List;
 
 public class PlayerQueue implements Iterable<Player> {
     private final List<Player> players;
+    private final List<String> originalPlayers;
     private int currentIndex;
     private static PlayerQueue instance;
 
     private PlayerQueue() {
         players = new ArrayList<>();
+        originalPlayers = new ArrayList<>();
         currentIndex = 0;
     }
 
@@ -55,36 +56,42 @@ public class PlayerQueue implements Iterable<Player> {
         for (String playerName : playerNames) {
             Player newPlayer = new Player(playerName);
             addPlayer(newPlayer);
+            originalPlayers.add(playerName);
         }
     }
 
-    public void resetPlayerCards(){
-        for(Player player : players)
-            player.clearCardsInHand();
+    public void resetPlayers(){
+        for(int i = 0; i < players.size(); i++) {
+            Player currentPlayer = players.get(i);
+            String originalName = originalPlayers.get(i);
+            currentPlayer.clearCardsInHand();
+            currentPlayer.setName(originalName);
+        }
         currentIndex = 0;
     }
 
-    public boolean checkForWinner(){
-        Round round = new Round();
+    public Player getRoundWinner(){
         for(Player player : players){
             if(player.getCardsInHand().isEmpty()) {
-                round.calculateRemainingPlayersPoints(player);
-                System.out.println("Congratulations " + player.getName() + " you have won the round with a score of: " + player.getRoundPoints());
-                displayScoreboard();
-                return true;
+                return player;
             }
         }
-        return false;
+        return null;
     }
 
-    public void displayScoreboard(){
-        System.out.println("----------------------------------");
-        System.out.println("PLAYERS SCOREBOARD");
+    public Player getGameWinner(){
+        Player winner = null;
+        int maxPoints = Integer.MIN_VALUE;
         for(Player player : players){
-            System.out.println(player.getName() + ": " + player.getRoundPoints());
+            int playerPoints = player.getRoundPoints();
+            if(playerPoints > maxPoints) {
+                maxPoints = playerPoints;
+                winner = player;
+            }
         }
-        System.out.println("----------------------------------");
+        return winner;
     }
+
 
     @Override
     public Iterator<Player> iterator() {
